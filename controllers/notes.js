@@ -37,17 +37,27 @@ notesRouter.post('/', async (request, response) => {
   }
   const user = await User.findById(decodedToken.id)
 
+  if (!body.content) { // Use body.content instead of content
+    console.error('Content is missing') // Log the missing content error
+    return response.status(400).json({ error: 'content missing' })
+  }
+
   const note = new Note({
     content: body.content,
     important: body.important || false,
     user: user._id
   })
 
-  const savedNote = await note.save()
-  user.notes = user.notes.concat(savedNote._id)
-  await user.save()
-
-  response.status(201).json(savedNote)
+  try {
+    const savedNote = await note.save()
+    user.notes = user.notes.concat(savedNote._id)
+    await user.save()
+    
+    res.status(201).json(savedNote)
+  } catch (error) {
+    console.error('Error saving note:', error) // Log any saving error
+    res.status(500).json({ error: 'something went wrong' })
+  }
 })
 
 notesRouter.get('/:id', async (request, response) => {
