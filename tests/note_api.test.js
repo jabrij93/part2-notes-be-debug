@@ -38,7 +38,6 @@ describe('when there is initially some notes saved', () => {
   })
 
   describe('viewing a specific note', () => {
-
     test('succeeds with a valid id', async () => {
       const notesAtStart = await helper.notesInDb()
 
@@ -75,19 +74,18 @@ describe('when there is initially some notes saved', () => {
         content: 'async/await simplifies making async calls',
         important: true,
       }
-
-      await api
+  
+      const response = await api
         .post('/api/notes')
         .send(newNote)
         .expect(201)
         .expect('Content-Type', /application\/json/)
-        .catch(err => {
-          console.error(err.response.body) // This will log the error message
-        })
-
+  
+      console.log('Response body:', response.body)
+  
       const notesAtEnd = await helper.notesInDb()
       assert.strictEqual(notesAtEnd.length, helper.initialNotes.length + 1)
-
+  
       const contents = notesAtEnd.map(n => n.content)
       assert(contents.includes('async/await simplifies making async calls'))
     })
@@ -181,6 +179,7 @@ describe('when there is initially one user at db', () => {
   })
 })
 
+// This is where the after block should go, after all describe blocks
 after(async () => {
   await User.deleteMany({})
   await mongoose.connection.close()
