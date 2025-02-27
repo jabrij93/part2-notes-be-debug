@@ -81,6 +81,9 @@ describe('when there is initially some notes saved', () => {
         .send(newNote)
         .expect(201)
         .expect('Content-Type', /application\/json/)
+        .catch(err => {
+          console.error(err.response.body) // This will log the error message
+        })
 
       const notesAtEnd = await helper.notesInDb()
       assert.strictEqual(notesAtEnd.length, helper.initialNotes.length + 1)
