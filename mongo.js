@@ -1,5 +1,5 @@
+const { config } = require('dotenv')
 const mongoose = require('mongoose')
-require('dotenv').config()
 
 if (process.argv.length < 3) {
   console.log('give password as argument')
@@ -8,7 +8,7 @@ if (process.argv.length < 3) {
 
 const password = process.argv[2]
 
-const url = process.env.TEST_MONGODB_URI
+const url = config.MONGODB_URI
 
 mongoose.set('strictQuery', false)
 
