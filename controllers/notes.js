@@ -53,10 +53,10 @@ notesRouter.post('/', async (request, response) => {
     user.notes = user.notes.concat(savedNote._id)
     await user.save()
     
-    res.status(201).json(savedNote)
+    response.status(201).json(savedNote)
   } catch (error) {
     console.error('Error saving note:', error) // Log any saving error
-    res.status(500).json({ error: 'something went wrong' })
+    response.status(500).json({ error: 'something went wrong' })
   }
 })
 
