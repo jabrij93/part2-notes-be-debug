@@ -26,7 +26,7 @@ describe('when there is initially some notes saved', () => {
 
   test('all notes are returned', async () => {
     const response = await api.get('/api/notes')
-
+    console.log('response', response)
     assert.strictEqual(response.body.length, helper.initialNotes.length)
   })
 
@@ -69,23 +69,39 @@ describe('when there is initially some notes saved', () => {
   })
 
   describe('addition of a new note', () => {
+    let token
+
+    beforeEach(async () => {
+      const newUser = {
+        username: 'root',
+        password: 'sekret',
+      }
+
+      // Log in the user to get the token
+      const loginResponse = await api
+        .post('/api/login')
+        .send(newUser)
+        .expect(200)
+
+      token = loginResponse.body.token
+    })
+
     test('succeeds with valid data', async () => {
       const newNote = {
         content: 'async/await simplifies making async calls',
         important: true,
       }
-  
+
       const response = await api
         .post('/api/notes')
+        .set('Authorization', `Bearer ${token}`)  // Include the token here
         .send(newNote)
         .expect(201)
         .expect('Content-Type', /application\/json/)
-  
-      console.log('Response body:', response.body)
-  
+
       const notesAtEnd = await helper.notesInDb()
       assert.strictEqual(notesAtEnd.length, helper.initialNotes.length + 1)
-  
+
       const contents = notesAtEnd.map(n => n.content)
       assert(contents.includes('async/await simplifies making async calls'))
     })
