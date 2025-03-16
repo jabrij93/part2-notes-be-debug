@@ -45,7 +45,8 @@ notesRouter.post('/', async (request, response) => {
   const note = new Note({
     content: body.content,
     important: body.important || false,
-    user: user._id
+    user: user._id,
+    date: body.date,  // Store the received date
   })
 
   try {
