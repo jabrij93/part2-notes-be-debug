@@ -30,44 +30,36 @@ notesRouter.put('/:id', async (request, response) => {
 })
 
 notesRouter.post('/', async (request, response) => {
+  const { content, important } = request.body
+
   try {
-    const body = request.body
-    const token = getTokenFrom(request)
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    console.log('Decoded Token:', decodedToken)  // ✅ Debugging log
 
-    if (!token) {
-      return response.status(401).json({ error: 'token missing' })
-    }
-
-    const decodedToken = jwt.verify(token, process.env.SECRET)
     if (!decodedToken.id) {
       return response.status(401).json({ error: 'token invalid' })
     }
 
     const user = await User.findById(decodedToken.id)
-    if (!user) {
-      return response.status(404).json({ error: 'user not found' })
-    }
+    console.log('User Found:', user)  // ✅ Debugging log
 
-    if (!body.content) {
-      console.error('Content is missing')
-      return response.status(400).json({ error: 'content missing' })
+    if (!user) {
+      return response.status(404).json({ error: 'user not found' })  // ❌ Your current error
     }
 
     const note = new Note({
-      content: body.content,
-      important: body.important || false,
+      content,
+      important: important || false,
+      date: new Date(),
       user: user._id,
-      date: body.date, // Store the received date
     })
 
     const savedNote = await note.save()
-    user.notes = user.notes.concat(savedNote._id)
-    await user.save()
+    response.json(savedNote)
 
-    response.status(201).json(savedNote)
   } catch (error) {
-    console.error('Error saving note:', error)
-    response.status(500).json({ error: 'something went wrong' })
+    console.error('Error:', error.message)
+    response.status(500).json({ error: 'Internal server error' })
   }
 })
 

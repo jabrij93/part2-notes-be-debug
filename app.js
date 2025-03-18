@@ -46,4 +46,10 @@ app.use('/api/testing', testingRouter)
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
+app.use((req, res, next) => {
+  console.log(`Incoming Request: ${req.method} ${req.path}`)
+  next()
+})
+
+
 module.exports = app
