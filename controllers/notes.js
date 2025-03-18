@@ -30,33 +30,43 @@ notesRouter.put('/:id', async (request, response) => {
 })
 
 notesRouter.post('/', async (request, response) => {
-  const body = request.body
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-  const user = await User.findById(decodedToken.id)
-
-  if (!body.content) { // Use body.content instead of content
-    console.error('Content is missing') // Log the missing content error
-    return response.status(400).json({ error: 'content missing' })
-  }
-
-  const note = new Note({
-    content: body.content,
-    important: body.important || false,
-    user: user._id,
-    date: body.date,  // Store the received date
-  })
-
   try {
+    const body = request.body
+    const token = getTokenFrom(request)
+
+    if (!token) {
+      return response.status(401).json({ error: 'token missing' })
+    }
+
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
+    if (!user) {
+      return response.status(404).json({ error: 'user not found' })
+    }
+
+    if (!body.content) {
+      console.error('Content is missing')
+      return response.status(400).json({ error: 'content missing' })
+    }
+
+    const note = new Note({
+      content: body.content,
+      important: body.important || false,
+      user: user._id,
+      date: body.date, // Store the received date
+    })
+
     const savedNote = await note.save()
     user.notes = user.notes.concat(savedNote._id)
     await user.save()
-    
+
     response.status(201).json(savedNote)
   } catch (error) {
-    console.error('Error saving note:', error) // Log any saving error
+    console.error('Error saving note:', error)
     response.status(500).json({ error: 'something went wrong' })
   }
 })
