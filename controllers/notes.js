@@ -44,7 +44,7 @@ notesRouter.post('/', async (request, response) => {
     console.log('User Found:', user)  // ✅ Debugging log
 
     if (!user) {
-      return response.status(404).json({ error: 'user not found' })  // ❌ Your current error
+      return response.status(404).json({ error: 'user not found' }) 
     }
 
     const note = new Note({
